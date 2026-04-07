@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app" data-testid="app-container">
+      <h1 class="app-title" data-testid="app-title">Список задач</h1>
+
+      <form class="todo-form" data-testid="todo-form" novalidate>
+        <label class="sr-only" for="todo-input">Новая задача</label>
+        <input
+          id="todo-input"
+          class="todo-input"
+          type="text"
+          placeholder="Введите задачу..."
+          autocomplete="off"
+          data-testid="todo-input"
+        />
+        <button class="add-button" type="submit" data-testid="add-button">
+          Добавить
+        </button>
+      </form>
+
+      <p class="error-message" role="alert" aria-live="polite" data-testid="error-message"></p>
+
+      <ul class="todo-list" data-testid="todo-list"></ul>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,163 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --border: #d1d5db;
+  --done: #9ca3af;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.app {
+  width: 100%;
+  max-width: 680px;
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  padding: 24px;
+}
+
+.app-title {
+  margin: 0 0 16px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.todo-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.todo-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+}
+
+.todo-input:focus {
+  outline: 2px solid #bfdbfe;
+  border-color: var(--primary);
+}
+
+.add-button,
+.action-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-button {
+  background: var(--primary);
+  color: #fff;
+}
+
+.add-button:hover {
+  background: var(--primary-hover);
+}
+
+.error-message {
+  min-height: 22px;
+  margin: 8px 2px 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.todo-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.todo-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.todo-text {
+  margin: 0;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.todo-item.completed .todo-text {
+  color: var(--done);
+  text-decoration: line-through;
+}
+
+.toggle-button {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.toggle-button:hover {
+  background: #d1d5db;
+}
+
+.delete-button {
+  background: var(--danger);
+  color: #fff;
+}
+
+.delete-button:hover {
+  background: var(--danger-hover);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  white-space: nowrap;
+  clip-path: inset(100%);
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+
+@media (max-width: 520px) {
+  .todo-form {
+    grid-template-columns: 1fr;
+  }
+
+  .add-button {
+    width: 100%;
+  }
+
+  .todo-item {
+    grid-template-columns: 1fr;
+  }
+}
