@@ -6,6 +6,9 @@ const listElement = document.querySelector('[data-testid="todo-list"]');
 const errorElement = document.querySelector('[data-testid="error-message"]');
 const filtersElement = document.querySelector('[data-testid="filters"]');
 const filterButtons = document.querySelectorAll(".filter-button");
+const clearCompletedButtonElement = document.querySelector(
+  '[data-testid="clear-completed-button"]'
+);
 
 let todoItems = loadTodos();
 let currentFilter = "all";
@@ -27,6 +30,10 @@ filtersElement.addEventListener("click", (event) => {
   currentFilter = targetButton.dataset.filter || "all";
   updateActiveFilterButton();
   renderTodos();
+});
+
+clearCompletedButtonElement.addEventListener("click", () => {
+  clearCompletedTodos();
 });
 
 function addTodo() {
@@ -67,6 +74,18 @@ function deleteTodo(todoId) {
   renderTodos();
 }
 
+function clearCompletedTodos() {
+  const hasCompletedTodos = todoItems.some((todo) => todo.completed);
+
+  if (!hasCompletedTodos) {
+    return;
+  }
+
+  todoItems = todoItems.filter((todo) => !todo.completed);
+  saveTodos();
+  renderTodos();
+}
+
 function renderTodos() {
   listElement.innerHTML = "";
 
@@ -98,6 +117,8 @@ function renderTodos() {
     itemElement.append(textElement, toggleButtonElement, deleteButtonElement);
     listElement.append(itemElement);
   });
+
+  updateClearCompletedButtonState();
 }
 
 function getFilteredTodos() {
@@ -117,6 +138,11 @@ function updateActiveFilterButton() {
     const isActive = button.dataset.filter === currentFilter;
     button.classList.toggle("active", isActive);
   });
+}
+
+function updateClearCompletedButtonState() {
+  const hasCompletedTodos = todoItems.some((todo) => todo.completed);
+  clearCompletedButtonElement.disabled = !hasCompletedTodos;
 }
 
 function loadTodos() {
