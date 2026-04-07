@@ -13,6 +13,7 @@ const clearCompletedButtonElement = document.querySelector(
 let todoItems = loadTodos();
 let currentFilter = "all";
 let editingTodoId = null;
+let draggedTodoId = null;
 
 renderTodos();
 
@@ -57,6 +58,61 @@ listElement.addEventListener("dblclick", (event) => {
 
   event.preventDefault();
   startEditTodo(todoId);
+});
+
+listElement.addEventListener("dragstart", (event) => {
+  const itemElement = event.target.closest('[data-testid="todo-item"]');
+
+  if (!itemElement || itemElement.dataset.draggable !== "true") {
+    event.preventDefault();
+    return;
+  }
+
+  draggedTodoId = itemElement.dataset.todoId || null;
+  if (!draggedTodoId) {
+    event.preventDefault();
+    return;
+  }
+
+  itemElement.classList.add("dragging");
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", draggedTodoId);
+  }
+});
+
+listElement.addEventListener("dragover", (event) => {
+  if (!draggedTodoId) {
+    return;
+  }
+
+  event.preventDefault();
+  const afterElement = getDragAfterElement(listElement, event.clientY);
+  const draggingElement = listElement.querySelector(".dragging");
+
+  if (!draggingElement) {
+    return;
+  }
+
+  if (!afterElement) {
+    listElement.append(draggingElement);
+    return;
+  }
+
+  listElement.insertBefore(draggingElement, afterElement);
+});
+
+listElement.addEventListener("drop", (event) => {
+  if (!draggedTodoId) {
+    return;
+  }
+
+  event.preventDefault();
+  applyDraggedOrder();
+});
+
+listElement.addEventListener("dragend", () => {
+  cleanupDragState();
 });
 
 function addTodo() {
@@ -141,12 +197,16 @@ function saveEditedTodo(todoId, nextText) {
 
 function renderTodos() {
   listElement.innerHTML = "";
+  draggedTodoId = null;
 
   getFilteredTodos().forEach((todo) => {
     const itemElement = document.createElement("li");
     itemElement.className = `todo-item${todo.completed ? " completed" : ""}`;
     itemElement.setAttribute("data-testid", "todo-item");
     itemElement.setAttribute("data-todo-id", todo.id);
+    const canDrag = editingTodoId !== todo.id;
+    itemElement.draggable = canDrag;
+    itemElement.dataset.draggable = String(canDrag);
 
     const textElement = document.createElement("p");
     textElement.className = "todo-text";
@@ -235,6 +295,60 @@ function focusEditingInput() {
 
   editInputElement.focus();
   editInputElement.select();
+}
+
+function getDragAfterElement(containerElement, mouseY) {
+  const draggableElements = [...containerElement.querySelectorAll('.todo-item:not(.dragging)')];
+
+  let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+
+  draggableElements.forEach((element) => {
+    const box = element.getBoundingClientRect();
+    const offset = mouseY - box.top - box.height / 2;
+
+    if (offset < 0 && offset > closest.offset) {
+      closest = { offset, element };
+    }
+  });
+
+  return closest.element;
+}
+
+function applyDraggedOrder() {
+  const orderedVisibleIds = [...listElement.querySelectorAll('[data-testid="todo-item"]')]
+    .map((item) => item.dataset.todoId)
+    .filter(Boolean);
+
+  if (orderedVisibleIds.length === 0) {
+    cleanupDragState();
+    return;
+  }
+
+  const orderedVisibleIdSet = new Set(orderedVisibleIds);
+  const byId = new Map(todoItems.map((todo) => [todo.id, todo]));
+
+  const orderedVisibleTodos = orderedVisibleIds
+    .map((id) => byId.get(id))
+    .filter(Boolean);
+
+  if (currentFilter === "all") {
+    todoItems = orderedVisibleTodos;
+  } else {
+    todoItems = todoItems.map((todo) =>
+      orderedVisibleIdSet.has(todo.id) ? orderedVisibleTodos.shift() : todo
+    );
+  }
+
+  saveTodos();
+  cleanupDragState();
+  renderTodos();
+}
+
+function cleanupDragState() {
+  listElement.querySelectorAll(".dragging").forEach((element) => {
+    element.classList.remove("dragging");
+  });
+  draggedTodoId = null;
 }
 
 function loadTodos() {
