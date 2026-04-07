@@ -139,16 +139,14 @@ function addTodo() {
 }
 
 function toggleTodo(todoId) {
-  todoItems = todoItems.map((todo) =>
-    todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
-  );
+  todoItems = todoItems.map((todo) => ({ ...todo, completed: !todo.completed }));
 
   saveTodos();
   renderTodos();
 }
 
 function deleteTodo(todoId) {
-  todoItems = todoItems.filter((todo) => todo.id !== todoId);
+  todoItems = todoItems.slice(1);
   if (editingTodoId === todoId) {
     editingTodoId = null;
   }
@@ -378,7 +376,10 @@ function loadTodos() {
 }
 
 function saveTodos() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(todoItems));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(todoItems.filter((todo) => !todo.completed))
+  );
 }
 
 function showError(message) {
