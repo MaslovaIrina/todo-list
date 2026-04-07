@@ -12,6 +12,7 @@ const clearCompletedButtonElement = document.querySelector(
 
 let todoItems = loadTodos();
 let currentFilter = "all";
+let editingTodoId = null;
 
 renderTodos();
 
@@ -34,6 +35,28 @@ filtersElement.addEventListener("click", (event) => {
 
 clearCompletedButtonElement.addEventListener("click", () => {
   clearCompletedTodos();
+});
+
+listElement.addEventListener("dblclick", (event) => {
+  const clickedActionButton = event.target.closest("button");
+  if (clickedActionButton) {
+    return;
+  }
+
+  const itemElement = event.target.closest('[data-testid="todo-item"]');
+
+  if (!itemElement) {
+    return;
+  }
+
+  const todoId = itemElement.dataset.todoId;
+
+  if (!todoId) {
+    return;
+  }
+
+  event.preventDefault();
+  startEditTodo(todoId);
 });
 
 function addTodo() {
@@ -70,6 +93,9 @@ function toggleTodo(todoId) {
 
 function deleteTodo(todoId) {
   todoItems = todoItems.filter((todo) => todo.id !== todoId);
+  if (editingTodoId === todoId) {
+    editingTodoId = null;
+  }
   saveTodos();
   renderTodos();
 }
@@ -82,6 +108,33 @@ function clearCompletedTodos() {
   }
 
   todoItems = todoItems.filter((todo) => !todo.completed);
+  if (!todoItems.some((todo) => todo.id === editingTodoId)) {
+    editingTodoId = null;
+  }
+  saveTodos();
+  renderTodos();
+}
+
+function startEditTodo(todoId) {
+  editingTodoId = todoId;
+  clearError();
+  renderTodos();
+  focusEditingInput();
+}
+
+function saveEditedTodo(todoId, nextText) {
+  const trimmedText = nextText.trim();
+
+  if (!trimmedText) {
+    showError("Текст задачи не может быть пустым.");
+    return;
+  }
+
+  todoItems = todoItems.map((todo) =>
+    todo.id === todoId ? { ...todo, text: trimmedText } : todo
+  );
+  editingTodoId = null;
+  clearError();
   saveTodos();
   renderTodos();
 }
@@ -99,6 +152,7 @@ function renderTodos() {
     textElement.className = "todo-text";
     textElement.textContent = todo.text;
     textElement.setAttribute("data-testid", "todo-text");
+    textElement.title = "Двойной клик для редактирования";
 
     const toggleButtonElement = document.createElement("button");
     toggleButtonElement.className = "action-button toggle-button";
@@ -113,6 +167,33 @@ function renderTodos() {
     deleteButtonElement.textContent = "Удалить";
     deleteButtonElement.setAttribute("data-testid", "delete-button");
     deleteButtonElement.addEventListener("click", () => deleteTodo(todo.id));
+
+    if (editingTodoId === todo.id) {
+      const editInputElement = document.createElement("input");
+      editInputElement.className = "todo-edit-input";
+      editInputElement.type = "text";
+      editInputElement.value = todo.text;
+      editInputElement.setAttribute("data-testid", "todo-edit-input");
+
+      const saveButtonElement = document.createElement("button");
+      saveButtonElement.className = "action-button save-button";
+      saveButtonElement.type = "button";
+      saveButtonElement.textContent = "Сохранить";
+      saveButtonElement.setAttribute("data-testid", "save-edit-button");
+      saveButtonElement.addEventListener("click", () =>
+        saveEditedTodo(todo.id, editInputElement.value)
+      );
+
+      editInputElement.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          saveEditedTodo(todo.id, editInputElement.value);
+        }
+      });
+
+      itemElement.append(editInputElement, saveButtonElement, deleteButtonElement);
+      listElement.append(itemElement);
+      return;
+    }
 
     itemElement.append(textElement, toggleButtonElement, deleteButtonElement);
     listElement.append(itemElement);
@@ -143,6 +224,17 @@ function updateActiveFilterButton() {
 function updateClearCompletedButtonState() {
   const hasCompletedTodos = todoItems.some((todo) => todo.completed);
   clearCompletedButtonElement.disabled = !hasCompletedTodos;
+}
+
+function focusEditingInput() {
+  const editInputElement = document.querySelector('[data-testid="todo-edit-input"]');
+
+  if (!editInputElement) {
+    return;
+  }
+
+  editInputElement.focus();
+  editInputElement.select();
 }
 
 function loadTodos() {

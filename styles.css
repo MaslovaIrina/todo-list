@@ -159,11 +159,34 @@ body {
   margin: 0;
   line-height: 1.4;
   word-break: break-word;
+  cursor: text;
 }
 
 .todo-item.completed .todo-text {
   color: var(--done);
   text-decoration: line-through;
+}
+
+.todo-edit-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.todo-edit-input:focus {
+  outline: 2px solid #bfdbfe;
+  border-color: var(--primary);
+}
+
+.save-button {
+  background: var(--primary);
+  color: #fff;
+}
+
+.save-button:hover {
+  background: var(--primary-hover);
 }
 
 .toggle-button {
