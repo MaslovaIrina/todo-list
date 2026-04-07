@@ -27,6 +27,18 @@
 
       <p class="error-message" role="alert" aria-live="polite" data-testid="error-message"></p>
 
+      <div class="filters" data-testid="filters">
+        <button class="filter-button active" type="button" data-filter="all" data-testid="filter-all">
+          Все
+        </button>
+        <button class="filter-button" type="button" data-filter="active" data-testid="filter-active">
+          Активные
+        </button>
+        <button class="filter-button" type="button" data-filter="completed" data-testid="filter-completed">
+          Выполненные
+        </button>
+      </div>
+
       <ul class="todo-list" data-testid="todo-list"></ul>
     </main>
 
